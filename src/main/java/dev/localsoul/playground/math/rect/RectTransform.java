@@ -29,6 +29,8 @@ import javax.annotation.Nonnull;
  */
 public record RectTransform(Anchor anchor, Vector2f offsetMin, Vector2f offsetMax, Vector2f size) {
 
+    private static final float EPSILON = 1e-5f;
+
     /**
      * Löst diese Transform gegen die übergegebenen Eltern-Abmessungen in konkrete
      * {@link Rect}-Koordinaten auf.
@@ -47,13 +49,18 @@ public record RectTransform(Anchor anchor, Vector2f offsetMin, Vector2f offsetMa
      * @return das aufgelöste Rechteck mit x, y, Breite und Höhe
      */
     public @Nonnull Rect resolve(final float parentWidth, final float parentHeight) {
+
+        if (parentWidth < 0 || parentHeight < 0) {
+            throw new IllegalArgumentException("Parent dimensions must be non-negative");
+        }
+
         final float x1;
         final float x2;
         final float y1;
         final float y2;
 
         // X-Achse
-        if (anchor.min().x() == anchor.max().x()) {
+        if (Math.abs(anchor.min().x() - anchor.max().x()) < EPSILON) {
             // nicht gestreckt: offsetMin.x ist die Position, size gibt die Breite
             x1 = anchor.min().x() * parentWidth + offsetMin.x();
             x2 = x1 + size.x();
@@ -64,7 +71,7 @@ public record RectTransform(Anchor anchor, Vector2f offsetMin, Vector2f offsetMa
         }
 
         // Y-Achse, analog
-        if (anchor.min().y() == anchor.max().y()) {
+        if (Math.abs(anchor.min().y() - anchor.max().y()) < EPSILON) {
             y1 = anchor.min().y() * parentHeight + offsetMin.y();
             y2 = y1 + size.y();
         } else {
