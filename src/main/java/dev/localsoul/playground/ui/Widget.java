@@ -139,14 +139,23 @@ public abstract class Widget {
     }
 
     /**
-     * Hängt ein Kind-Widget an und setzt dabei dessen Eltern-Referenz.
+     * Hängt ein Kind-Widget an.
      *
-     * <p>Hinweis: Ein Widget kann aktuell nur genau ein Eltern-Widget besitzen; wird es an
-     * ein zweites Widget angehängt, wird die vorherige Eltern-Beziehung nicht entfernt.</p>
+     * <p>Hat das Widget bereits ein anderes Eltern-Widget, wird es dort zuvor entfernt
+     * (Reparenting). So bleiben Eltern-Referenz und Kind-Liste immer konsistent – ein
+     * Widget besitzt zu jedem Zeitpunkt höchstens ein Eltern-Widget.</p>
      *
      * @param child das anzuhängende Kind-Widget; darf nicht {@code null} sein
      */
     public final void addChild(@Nonnull final Widget child) {
+        if (child.parent == this) {
+            return; // bereits direktes Kind dieses Widgets – nichts zu tun
+        }
+        // Reparenting: vorherige Eltern-Beziehung sauber auflösen, sonst bliebe das
+        // Widget in der Kind-Liste des alten Parents und würde dort weiter mitgezeichnet.
+        if (child.parent != null) {
+            child.parent.children.remove(child);
+        }
         child.parent = this;
         children.add(child);
     }
@@ -158,8 +167,10 @@ public abstract class Widget {
      * ({@code z}-Reihenfolge), sodass ein vorne liegendes, überlappendes Kind Vorrang hat.
      * Erst wenn kein Kind trifft, wird die eigene absolute Bounding-Box geprüft.</p>
      *
-     * @param x X-Koordinate relativ zur Position des Eltern-Widgets
-     * @param y Y-Koordinate relativ zur Position des Eltern-Widgets
+     * @param x X-Koordinate absolut – im Koordinatensystem der Wurzel/des Canvases,
+     *          nicht relativ zum Eltern-Widget
+     * @param y Y-Koordinate absolut – im Koordinatensystem der Wurzel/des Canvases,
+     *          nicht relativ zum Eltern-Widget
      * @return das getroffene Widget oder {@code null}, wenn kein Widget getroffen wurde
      */
     public final Widget hitTest(final float x, final float y) {
