@@ -14,19 +14,15 @@ import dev.localsoul.playground.ui.swing.UICanvas;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.IOException;
 
 public class NineSliceTest {
 
     static void main() {
         final AssetManager assetManager = new AssetManager();
-        try {
-            assetManager.loadAllAssets(
+
+        assetManager.loadAllAssets(
                     new Asset("NineSliceTest", "assets/ui/nineslice_test.png", 12, 12, 12, 12)
             );
-        } catch (final IOException e) {
-            throw new RuntimeException(e);
-        }
 
         SwingUtilities.invokeLater(() -> {
 

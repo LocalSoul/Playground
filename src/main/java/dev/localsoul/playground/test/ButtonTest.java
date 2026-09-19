@@ -12,11 +12,10 @@ import dev.localsoul.playground.ui.swing.UICanvas;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.IOException;
 
 public class ButtonTest {
 
-    static void main() throws IOException {
+    static void main() {
 
         final AssetManager assetManager = new AssetManager();
         assetManager.loadAllAssets(

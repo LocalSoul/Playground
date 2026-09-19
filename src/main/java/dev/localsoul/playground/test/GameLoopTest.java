@@ -14,7 +14,6 @@ import dev.localsoul.playground.ui.swing.UICanvas;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.IOException;
 
 /**
  * Manueller Fenster-Test für das Zusammenspiel aus {@link GameLoop}, {@link InputDispatcher}
@@ -30,7 +29,7 @@ public class GameLoopTest {
     /**
      * Einstiegspunkt (per IDE ausführbar, analog zu den übrigen {@code *Test}-Klassen).
      */
-    static void main() throws IOException {
+    static void main() {
 
         // Eigenes GameLoopTest-Objekt für die LoopListener-Callbacks: Diese delegieren nur
         // an die Instanzmethoden tick()/catchUp(), die die echte Spiellogik später aufnehmen.
