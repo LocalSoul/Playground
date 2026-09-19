@@ -19,16 +19,21 @@ public class UICanvas extends JPanel {
     private final RootWidget rootWidget;
 
     /**
-     * Erzeugt ein Canvas für die übergebene Hierarchie-Wurzel.
+     * Erzeugt ein Canvas für die übergebene Hierarchie-Wurzel und verdrahtet den
+     * übergebenen {@link InputDispatcher} mit den Swing-Maus-Events: Bewegung und Drag
+     * werden als {@code pointerMoved}, linker Klick als {@code pointerPressed}/
+     * {@code pointerReleased}, und Verlassen des Canvases als {@code pointerExited}
+     * weitergeleitet. Zusätzlich wird die Wurzel bei Größenänderung des Panels neu
+     * dimensioniert.
      *
-     * <p>Richtet ein {@link InputDispatcher} ein und verdrahtet ihn mit den Swing-Maus-Events:
-     * Bewegung und Drag werden als {@code pointerMoved}, linker Klick als {@code pointerPressed}/
-     * {@code pointerReleased}, und Verlassen des Canvases als {@code pointerExited} weitergeleitet.
-     * Zusätzlich wird die Wurzel bei Größenänderung des Panels neu dimensioniert.</p>
+     * <p>Der Dispatcher wird von außen übergeben (nicht hier erzeugt), damit dieselbe
+     * Instanz für Click- und Hover-Callbacks sowie für den Per-Frame-Update aus der
+     * Game-Schleife (siehe {@code input.update()}) genutzt werden kann.</p>
      *
      * @param rootWidget die Hierarchie-Wurzel; darf nicht {@code null} sein
+     * @param input      der zu verdrahtende Eingabe-Dispatcher; darf nicht {@code null} sein
      */
-    public UICanvas(final @Nonnull RootWidget rootWidget) {
+    public UICanvas(final @Nonnull RootWidget rootWidget, @Nonnull final InputDispatcher input) {
         this.rootWidget = rootWidget;
         setDoubleBuffered(true);
 
@@ -39,8 +44,6 @@ public class UICanvas extends JPanel {
                 repaint();
             }
         });
-
-        final InputDispatcher input = new InputDispatcher(rootWidget);
 
         final MouseAdapter adapter = new MouseAdapter() {
             @Override

@@ -2,6 +2,7 @@ package dev.localsoul.playground.test;
 
 import dev.localsoul.playground.asset.Asset;
 import dev.localsoul.playground.asset.AssetManager;
+import dev.localsoul.playground.input.InputDispatcher;
 import dev.localsoul.playground.math.Vector2f;
 import dev.localsoul.playground.math.rect.RectTransform;
 import dev.localsoul.playground.ui.Button;
@@ -46,7 +47,7 @@ public class ButtonTest {
 
             root.addChild(button);
 
-            final UICanvas canvas = new UICanvas(root);
+            final UICanvas canvas = new UICanvas(root, new InputDispatcher(root));
             canvas.setPreferredSize(new Dimension(1280, 720));
 
             final JFrame frame = new JFrame("Idle Clicker - Render Test");
