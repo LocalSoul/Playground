@@ -145,8 +145,9 @@ public class Button extends Widget {
         final float centerY = (bounds.height() - fm.getHeight()) / 2f + fm.getAscent();
 
         // Text auf die Button-Fläche begrenzen: Ein zu langer Text läuft sonst über die
-        // 9-Slice-Kanten hinaus; der Clip schneidet ihn sauber an den Button-Rändern ab.
-        g.setClip(0, 0, width, height);
+        // 9-Slice-Kanten hinaus. Bewusst clipRect() statt setClip(): clipRect() schneidet das
+        // Rechteck mit einem evtl. vorhandenen Clip (z. B. vom Eltern-Widget) und ersetzt ihn nicht.
+        g.clipRect(0, 0, width, height);
 
         g.setColor(textColor);
         g.drawString(text, centerX, centerY);
