@@ -63,8 +63,9 @@ public abstract class Widget {
 
     /**
      * Rendert dieses Widget. Implementiert das Template-Method-Pattern:
-     * Zuerst wird {@link #drawSelf(Graphics2D)} (das eigene Aussehen) gezeichnet,
-     * danach rekursiv alle Kinder über {@code drawChildren}.
+     * Zuerst werden die lokalen Bounds über {@link #getBounds()} aufgelöst und zusammen mit
+     * dem Kontext an {@link #drawSelf(Graphics2D, Rect)} (das eigene Aussehen) übergeben,
+     * danach werden rekursiv alle Kinder über {@code drawChildren} gezeichnet.
      *
      * <p>Diese Methode ist {@code final}, damit die Reihenfolge „Self → Children"
      * fest garantiert bleibt und keine Unterklasse sie versehentlich bricht.</p>
@@ -73,7 +74,8 @@ public abstract class Widget {
      *          die Translation in Kind-Koordinaten passiert innerhalb von {@code drawChildren}
      */
     public final void draw(final Graphics2D g) {
-        drawSelf(g);      // <- das überschreibt jede konkrete Widget-Klasse
+        final Rect bounds = getBounds();
+        drawSelf(g, bounds);      // <- das überschreibt jede konkrete Widget-Klasse
         drawChildren(g);  // <- das bleibt in der Basisklasse, unverändert
     }
 
@@ -81,12 +83,16 @@ public abstract class Widget {
      * Hook für das eigene Aussehen eines Widgets (die konkrete Widget-Klasse).
      * Wird von {@link #draw(Graphics2D)} vor den Kindern aufgerufen.
      *
+     * <p>Die Bounds werden bereits in {@link #draw(Graphics2D)} aufgelöst und als Parameter
+     * übergeben – eine konkrete Unterklasse muss {@link #getBounds()} nicht erneut aufrufen.</p>
+     *
      * <p>Die Standard-Implementierung ist leer: Ein reiner Container wie ein hierarchisches
      * Panel zeichnet selbst nichts und muss diese Methode nicht überschreiben.</p>
      *
-     * @param g der bereits in lokale Koordinaten übersetzte Grafik-Kontext
+     * @param g      der bereits in lokale Koordinaten übersetzte Grafik-Kontext
+     * @param bounds die aufgelösten lokalen Bounds (Breite/Höhe) dieses Widgets
      */
-    protected void drawSelf(final Graphics2D g) {
+    protected void drawSelf(final Graphics2D g, final Rect bounds) {
         // Default: nichts. Ein reines Container-Panel ohne eigenes Aussehen
         // muss das nicht überschreiben.
     }
