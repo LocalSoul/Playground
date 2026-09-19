@@ -33,7 +33,9 @@ public class ButtonTest {
                     new Vector2f(128, 64) //size
             );
 
-            final Button button = new Button(testTransform, assetManager.getNineSlice("Button"), "test Button");
+            // Bewusst deutlich längerer Text als der Button (128 px breit), um das
+            // Überschreiten der Ränder und das Text-Clipping in Button.drawSelf zu prüfen.
+            final Button button = new Button(testTransform, assetManager.getNineSlice("Button"), "test Button das ist ein sehr langer text um zu gucken ob clip funktioniert");
             root.addChild(button);
 
             final UICanvas canvas = new UICanvas(root);

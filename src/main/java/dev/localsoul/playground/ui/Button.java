@@ -112,6 +112,9 @@ public class Button extends Widget {
      * baselineY = (height − lineHeight) / 2 + ascent
      * </pre>
      *
+     * <p>Ist die Beschriftung länger als der Button, wird sie an den Button-Rändern
+     * abgeschnitten (Clipping), statt über die Hintergrund-Textur hinauszuzeichnen.</p>
+     *
      * @param g      der bereits in lokale Koordinaten übersetzte Grafik-Kontext
      * @param bounds die aufgelösten lokalen Bounds; verwendet werden nur Breite/Höhe
      */
@@ -140,6 +143,10 @@ public class Button extends Widget {
         // der Ascent-Teil) in der Mitte sitzt. Ohne +ascent würde der Text zu hoch stehen.
         // Auch hier die Float-Bounds verwenden, um Rundungsfehler der Höhe zu vermeiden.
         final float centerY = (bounds.height() - fm.getHeight()) / 2f + fm.getAscent();
+
+        // Text auf die Button-Fläche begrenzen: Ein zu langer Text läuft sonst über die
+        // 9-Slice-Kanten hinaus; der Clip schneidet ihn sauber an den Button-Rändern ab.
+        g.setClip(0, 0, width, height);
 
         g.setColor(textColor);
         g.drawString(text, centerX, centerY);
