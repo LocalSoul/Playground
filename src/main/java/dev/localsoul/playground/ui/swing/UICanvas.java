@@ -1,6 +1,6 @@
 package dev.localsoul.playground.ui.swing;
 
-import dev.localsoul.playground.input.InputDispatcher;
+import dev.localsoul.playground.core.input.InputDispatcher;
 import dev.localsoul.playground.ui.RootWidget;
 
 import javax.annotation.Nonnull;

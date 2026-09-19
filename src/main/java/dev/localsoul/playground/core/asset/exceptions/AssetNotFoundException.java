@@ -1,6 +1,6 @@
-package dev.localsoul.playground.asset.exceptions;
+package dev.localsoul.playground.core.asset.exceptions;
 
-import dev.localsoul.playground.asset.Asset;
+import dev.localsoul.playground.core.asset.Asset;
 
 public class AssetNotFoundException extends RuntimeException {
     public AssetNotFoundException(final String id) {

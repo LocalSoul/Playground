@@ -1,5 +1,6 @@
 package dev.localsoul.playground.math;
 
+import dev.localsoul.playground.core.math.Vector2f;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

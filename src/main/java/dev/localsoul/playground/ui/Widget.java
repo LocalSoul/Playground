@@ -1,7 +1,7 @@
 package dev.localsoul.playground.ui;
 
-import dev.localsoul.playground.math.rect.Rect;
-import dev.localsoul.playground.math.rect.RectTransform;
+import dev.localsoul.playground.core.math.rect.Rect;
+import dev.localsoul.playground.core.math.rect.RectTransform;
 import dev.localsoul.playground.ui.anchor.Anchor;
 import dev.localsoul.playground.ui.layout.LayoutStrategy;
 

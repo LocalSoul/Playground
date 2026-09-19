@@ -1,4 +1,4 @@
-package dev.localsoul.playground.math;
+package dev.localsoul.playground.core.math;
 
 public class Vector2f {
 

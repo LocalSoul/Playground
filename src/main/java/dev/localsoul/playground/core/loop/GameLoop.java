@@ -1,4 +1,4 @@
-package dev.localsoul.playground.loop;
+package dev.localsoul.playground.core.loop;
 
 import java.util.function.LongSupplier;
 

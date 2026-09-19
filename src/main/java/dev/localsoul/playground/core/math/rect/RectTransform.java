@@ -1,6 +1,6 @@
-package dev.localsoul.playground.math.rect;
+package dev.localsoul.playground.core.math.rect;
 
-import dev.localsoul.playground.math.Vector2f;
+import dev.localsoul.playground.core.math.Vector2f;
 import dev.localsoul.playground.ui.anchor.Anchor;
 
 import javax.annotation.Nonnull;

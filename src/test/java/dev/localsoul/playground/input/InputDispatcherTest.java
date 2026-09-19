@@ -1,7 +1,8 @@
 package dev.localsoul.playground.input;
 
-import dev.localsoul.playground.math.Vector2f;
-import dev.localsoul.playground.math.rect.RectTransform;
+import dev.localsoul.playground.core.input.InputDispatcher;
+import dev.localsoul.playground.core.math.Vector2f;
+import dev.localsoul.playground.core.math.rect.RectTransform;
 import dev.localsoul.playground.ui.RootWidget;
 import dev.localsoul.playground.ui.TestWidget;
 import dev.localsoul.playground.ui.anchor.Anchor;

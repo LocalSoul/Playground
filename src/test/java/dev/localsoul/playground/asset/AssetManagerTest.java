@@ -1,6 +1,8 @@
 package dev.localsoul.playground.asset;
 
-import dev.localsoul.playground.asset.exceptions.AssetNotFoundException;
+import dev.localsoul.playground.core.asset.Asset;
+import dev.localsoul.playground.core.asset.AssetManager;
+import dev.localsoul.playground.core.asset.exceptions.AssetNotFoundException;
 import dev.localsoul.playground.ui.slice.NineSlice;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;

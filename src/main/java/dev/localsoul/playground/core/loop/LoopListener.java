@@ -1,4 +1,4 @@
-package dev.localsoul.playground.loop;
+package dev.localsoul.playground.core.loop;
 
 /**
  * Empfänger der Aufrufe einer {@link GameLoop}. Die drei Methoden decken die drei

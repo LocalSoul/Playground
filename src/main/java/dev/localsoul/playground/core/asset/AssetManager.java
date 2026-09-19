@@ -1,6 +1,6 @@
-package dev.localsoul.playground.asset;
+package dev.localsoul.playground.core.asset;
 
-import dev.localsoul.playground.asset.exceptions.AssetNotFoundException;
+import dev.localsoul.playground.core.asset.exceptions.AssetNotFoundException;
 import dev.localsoul.playground.ui.slice.NineSlice;
 
 import javax.annotation.Nonnull;

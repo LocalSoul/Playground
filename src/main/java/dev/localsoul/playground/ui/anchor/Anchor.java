@@ -1,6 +1,6 @@
 package dev.localsoul.playground.ui.anchor;
 
-import dev.localsoul.playground.math.Vector2f;
+import dev.localsoul.playground.core.math.Vector2f;
 
 /**
  * Ein Paar normierter Ankerpunkte ({@code min}, {@code max}) im Bereich 0…1, das einen

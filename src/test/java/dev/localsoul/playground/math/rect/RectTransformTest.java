@@ -1,6 +1,8 @@
 package dev.localsoul.playground.math.rect;
 
-import dev.localsoul.playground.math.Vector2f;
+import dev.localsoul.playground.core.math.Vector2f;
+import dev.localsoul.playground.core.math.rect.Rect;
+import dev.localsoul.playground.core.math.rect.RectTransform;
 import dev.localsoul.playground.ui.anchor.Anchor;
 import org.junit.jupiter.api.Test;
 

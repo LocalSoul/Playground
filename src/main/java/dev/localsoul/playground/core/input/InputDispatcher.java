@@ -1,4 +1,4 @@
-package dev.localsoul.playground.input;
+package dev.localsoul.playground.core.input;
 
 import dev.localsoul.playground.ui.Widget;
 
