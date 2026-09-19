@@ -99,8 +99,8 @@ class WidgetTest {
     @Test
     void hitTestReturnsTopmostChildFirst() {
         final RootWidget root = new RootWidget(100, 100);
-        final TestWidget first = new TestWidget(new RectTransform(Anchor.TOP_LEFT, new Vector2f(10f, 10f), new Vector2f(), new Vector2f(20f, 20f)));
-        final TestWidget second = new TestWidget(new RectTransform(Anchor.TOP_LEFT, new Vector2f(15f, 10f), new Vector2f(), new Vector2f(20f, 20f)));
+        final TestWidget first = new TestWidget(new RectTransform(Anchor.TOP_LEFT, new Vector2f(10f, 10f), new Vector2f(), new Vector2f(20f, 20f)), true);
+        final TestWidget second = new TestWidget(new RectTransform(Anchor.TOP_LEFT, new Vector2f(15f, 10f), new Vector2f(), new Vector2f(20f, 20f)), true);
         root.addChild(first);
         root.addChild(second);
 
@@ -109,20 +109,82 @@ class WidgetTest {
     }
 
     @Test
-    void hitTestReturnsRootWhenOnlyRootHit() {
+    void hitTestSkipsNonInteractableWidgets() {
+        // RootWidget ist nicht interaktabel – trifft kein interaktables Kind,
+        // liefert der Hit-Test null (statt die Wurzel selbst).
         final RootWidget root = new RootWidget(100, 100);
-        final TestWidget child = new TestWidget(new RectTransform(Anchor.TOP_LEFT, new Vector2f(10f, 10f), new Vector2f(), new Vector2f(20f, 20f)));
-        root.addChild(child);
+        root.addChild(new TestWidget(new RectTransform(Anchor.TOP_LEFT, new Vector2f(10f, 10f), new Vector2f(), new Vector2f(20f, 20f))));
 
-        assertSame(root, root.hitTest(5f, 5f));
+        assertNull(root.hitTest(15f, 15f));
+    }
+
+    @Test
+    void hitTestReturnsInteractableChildInsideNonInteractableContainer() {
+        // Ein nicht interaktabler Container (Panel-artig) darf als Träger für ein
+        // interaktables Kind fungieren: Das Kind wird getroffen, die Container-Fläche nicht.
+        final RootWidget root = new RootWidget(100, 100);
+        final TestWidget panel = new TestWidget(new RectTransform(Anchor.TOP_LEFT, new Vector2f(), new Vector2f(), new Vector2f(100f, 100f)));
+        final TestWidget button = new TestWidget(new RectTransform(Anchor.TOP_LEFT, new Vector2f(10f, 10f), new Vector2f(), new Vector2f(20f, 20f)), true);
+        root.addChild(panel);
+        panel.addChild(button);
+
+        assertSame(button, root.hitTest(15f, 15f));
+        assertNull(root.hitTest(5f, 5f));
     }
 
     @Test
     void hitTestReturnsNullOutsideEverything() {
         final RootWidget root = new RootWidget(100, 100);
-        root.addChild(new TestWidget(new RectTransform(Anchor.TOP_LEFT, new Vector2f(10f, 10f), new Vector2f(), new Vector2f(20f, 20f))));
+        root.addChild(new TestWidget(new RectTransform(Anchor.TOP_LEFT, new Vector2f(10f, 10f), new Vector2f(), new Vector2f(20f, 20f)), true));
 
         assertNull(root.hitTest(150f, 150f));
+    }
+
+    @Test
+    void isInteractableReflectsConstructor() {
+        final RectTransform transform = new RectTransform(Anchor.TOP_LEFT, new Vector2f(), new Vector2f(), new Vector2f(10, 10));
+        assertFalse(new TestWidget(transform).isInteractable());
+        assertTrue(new TestWidget(transform, true).isInteractable());
+    }
+
+    @Test
+    void clickCallbackFiresOnClick() {
+        final RootWidget root = new RootWidget(100, 100);
+        final TestWidget widget = new TestWidget(new RectTransform(Anchor.TOP_LEFT, new Vector2f(), new Vector2f(), new Vector2f(10, 10)), true);
+        root.addChild(widget);
+
+        final AtomicBoolean clicked = new AtomicBoolean(false);
+        widget.setClickCallback(() -> clicked.set(true));
+
+        widget.onClick();
+        assertTrue(clicked.get());
+    }
+
+    @Test
+    void hoverCallbacksFireOnEnterAndExit() {
+        final TestWidget widget = new TestWidget(new RectTransform(Anchor.TOP_LEFT, new Vector2f(), new Vector2f(), new Vector2f(10, 10)), true);
+
+        final AtomicBoolean entered = new AtomicBoolean(false);
+        final AtomicBoolean exited = new AtomicBoolean(false);
+        widget.setHoverEnterCallback(() -> entered.set(true));
+        widget.setHoverExitCallback(() -> exited.set(true));
+
+        widget.onHoverEnter();
+        assertTrue(entered.get());
+
+        widget.onHoverExit();
+        assertTrue(exited.get());
+    }
+
+    @Test
+    void mousePressedStateToggles() {
+        final TestWidget widget = new TestWidget(new RectTransform(Anchor.TOP_LEFT, new Vector2f(), new Vector2f(), new Vector2f(10, 10)), true);
+
+        assertFalse(widget.isMousePressed());
+        widget.setMousePressed(true);
+        assertTrue(widget.isMousePressed());
+        widget.setMousePressed(false);
+        assertFalse(widget.isMousePressed());
     }
 
     @Test
@@ -157,11 +219,5 @@ class WidgetTest {
     void relayoutWithoutStrategyDoesNothing() {
         final RootWidget root = new RootWidget(100, 100);
         root.relayout();
-    }
-
-    private static class TestWidget extends Widget {
-        TestWidget(final RectTransform transform) {
-            super(transform);
-        }
     }
 }

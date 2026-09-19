@@ -36,6 +36,14 @@ public class ButtonTest {
             // Bewusst deutlich längerer Text als der Button (128 px breit), um das
             // Überschreiten der Ränder und das Text-Clipping in Button.drawSelf zu prüfen.
             final Button button = new Button(testTransform, assetManager.getNineSlice("Button"), "test Button das ist ein sehr langer text um zu gucken ob clip funktioniert");
+
+            // Eingabe-Test: Der UICanvas verdrahtet die Maus-Events über den InputDispatcher
+            // mit der Widget-Hierarchie. Die Callbacks landen hier nur auf stdout, um das
+            // Zusammenspiel von Hover (Enter/Exit) und Klick sichtbar zu prüfen.
+            button.setClickCallback(() -> System.out.println("Clicked!"));
+            button.setHoverEnterCallback(() -> System.out.println("Hover Entered!"));
+            button.setHoverExitCallback(() -> System.out.println("Hover Exited!"));
+
             root.addChild(button);
 
             final UICanvas canvas = new UICanvas(root);

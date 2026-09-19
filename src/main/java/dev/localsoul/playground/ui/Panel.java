@@ -28,7 +28,7 @@ public class Panel extends Widget {
      * @param nineSlice die 9-Slice-Textur für den Hintergrund; darf nicht {@code null} sein
      */
     public Panel(final RectTransform transform, final NineSlice nineSlice) {
-        super(transform);
+        super(transform, false);
         this.nineSlice = nineSlice;
     }
 

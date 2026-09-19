@@ -68,7 +68,7 @@ public class Button extends Widget {
      * @param text      die Beschriftung; darf nicht {@code null} sein
      */
     public Button(final @Nonnull RectTransform transform, final @Nonnull NineSlice slice, final @Nonnull String text) {
-        super(transform);
+        super(transform, true);
         this.slice = slice;
         this.text = text;
         this.textColor = DEFAULT_TEXT_COLOR;
@@ -112,6 +112,10 @@ public class Button extends Widget {
      * baselineY = (height − lineHeight) / 2 + ascent
      * </pre>
      *
+     * <p>Solange der Button gedrückt ist ({@link #isMousePressed()}), wird über dem
+     * 9-Slice-Hintergrund eine halbtransparente, dunkle Ebene gelegt – so reagiert der
+     * Button visuell auf den Pressed-Zustand, den der {@code InputDispatcher} setzt.</p>
+     *
      * <p>Ist die Beschriftung länger als der Button, wird sie an den Button-Rändern
      * abgeschnitten (Clipping), statt über die Hintergrund-Textur hinauszuzeichnen.</p>
      *
@@ -125,6 +129,13 @@ public class Button extends Widget {
 
         // Hintergrund: 9-Slice an den lokalen Ursprung (0,0) zeichnen.
         NineSliceRenderer.draw(g, slice, width, height);
+
+        // Pressed-Feedback: halbtransparente Abdunklung über die gesamte Button-Fläche,
+        // solange die Maustaste (laut InputDispatcher) auf dem Button gedrückt ist.
+        if (isMousePressed()) {
+            g.setColor(new Color(0, 0, 0, 60));
+            g.fillRect(0, 0, width, height);
+        }
 
         // Schriftart setzen, BEVOR die FontMetrics ermittelt werden –
         // getFontMetrics() misst stets mit der aktuell gesetzten Font.

@@ -53,12 +53,57 @@ public abstract class Widget {
     private LayoutStrategy layoutStrategy;
 
     /**
-     * Erzeugt ein Widget mit der übergebenen Transformation.
+     * Ob dieses Widget selbst als Eingabeziel (Hover/Klick) infrage kommt. Reine Container wie
+     * {@link Panel} oder {@link RootWidget} sind {@code false} und werden von {@link #hitTest(float, float)}
+     * übergangen – sie dienen nur als Träger für interaktable Kinder.
+     */
+    private final boolean interactable;
+    /**
+     * Optionale Aktion, die bei einem Klick (drücken und an derselben Stelle loslassen) ausgeführt wird.
+     * Wird von {@link #onClick()} aufgerufen; {@code null} bedeutet „keine Reaktion möglich“.
+     * Siehe {@link #setClickCallback(Runnable)}.
+     */
+    private Runnable clickCallback;
+    /**
+     * Optionale Aktion beim Eintritt des Mauszeigers. Wird von {@link #onHoverEnter()} aufgerufen;
+     * {@code null} bedeutet „keine Reaktion“. Siehe {@link #setHoverEnterCallback(Runnable)}.
+     */
+    private Runnable hoverEnterCallback;
+    /**
+     * Optionale Aktion beim Verlassen des Mauszeigers. Wird von {@link #onHoverExit()} aufgerufen;
+     * {@code null} bedeutet „keine Reaktion“. Siehe {@link #setHoverExitCallback(Runnable)}.
+     */
+    private Runnable hoverExitCallback;
+    /**
+     * Ob die Maustaste derzeit über diesem Widget gedrückt ist (Pressed-Zustand). Wird vom
+     * {@code InputDispatcher} beim Drücken/Loslassen gesetzt und kann von {@link #drawSelf(Graphics2D, Rect)}
+     * für eine visuelle Rückmeldung (z. B. abgedunkelter Button) verwendet werden.
+     */
+    private boolean mousePressed;
+
+    /**
+     * Vollständiger Konstruktor für die Unterklassen.
+     *
+     * @param transform   die Anker-/Offset-/Größen-Definition für dieses Widget; darf nicht {@code null} sein
+     * @param interactable {@code true}, wenn das Widget selbst Eingaben (Hover/Klick) empfangen soll;
+     *                     {@code false} für reine Container (z. B. {@link Panel}, {@link RootWidget})
+     */
+    public Widget(final RectTransform transform, final boolean interactable) {
+        this.transform = Objects.requireNonNull(transform, "transform must not be null");
+        this.interactable = interactable;
+    }
+
+    /**
+     * Convenience-Konstruktor für nicht interaktable Widgets.
+     *
+     * <p>Container, die selbst keine Eingaben empfangen, können auf den zweiten Parameter
+     * verzichten. Interaktive Widgets (z. B. {@link Button}) übergeben dagegen explizit
+     * {@code interactable = true} über den zweiparametrigen Konstruktor.</p>
      *
      * @param transform die Anker-/Offset-/Größen-Definition für dieses Widget; darf nicht {@code null} sein
      */
-    public Widget(final RectTransform transform) {
-        this.transform = Objects.requireNonNull(transform, "transform must not be null");
+    protected Widget(final RectTransform transform) {
+        this(transform, false);
     }
 
     /**
@@ -124,18 +169,72 @@ public abstract class Widget {
 
     /**
      * Eingabe-Hook für Klick-Events. Wird aufgerufen, wenn dieses Widget über
-     * {@link #hitTest(float, float)} als getroffenes Widget ermittelt wurde.
+     * {@link #hitTest(float, float)} als getroffenes Widget ermittelt wurde und der
+     * Klick-Trigger (Drücken + Loslassen an derselben Stelle) vollständig ist.
+     *
+     * <p>Die Standard-Implementierung führt den über {@link #setClickCallback(Runnable)}
+     * registrierten Callback aus, sofern einer gesetzt ist. Unterklassen können diese
+     * Methode überschreiben, um zusätzlich eigene Logik auszuführen.</p>
      */
     public void onClick() {
-        // Default: keine Reaktion.
+        if (clickCallback != null) {
+            clickCallback.run();
+        }
     }
 
     /**
-     * Eingabe-Hook für Hover-Events. Wird aufgerufen, sobald der Mauszeiger
-     * über diesem Widget liegt.
+     * Eingabe-Hook für Hover-Verlassen. Wird aufgerufen, sobald der Mauszeiger dieses
+     * Widget verlässt (der Hit-Test wechselt auf ein anderes oder gar kein Widget).
+     *
+     * <p>Die Standard-Implementierung führt den über {@link #setHoverExitCallback(Runnable)}
+     * registrierten Callback aus, sofern einer gesetzt ist.</p>
      */
-    public void onHover() {
-        // Default: keine Reaktion.
+    public void onHoverExit() {
+        if (hoverExitCallback != null) {
+            hoverExitCallback.run();
+        }
+    }
+
+    /**
+     * Eingabe-Hook für Hover-Eintritt. Wird aufgerufen, sobald der Mauszeiger über diesem
+     * Widget zu liegen kommt (der Hit-Test wechselt auf dieses Widget).
+     *
+     * <p>Die Standard-Implementierung führt den über {@link #setHoverEnterCallback(Runnable)}
+     * registrierten Callback aus, sofern einer gesetzt ist.</p>
+     */
+    public void onHoverEnter() {
+        if (hoverEnterCallback != null) {
+            hoverEnterCallback.run();
+        }
+    }
+
+    /**
+     * Liefert das oberste (zuletzt gezeichnete) <em>interaktable</em> Widget, das die übergebene Position abdeckt.
+     *
+     * <p>Die Prüfung läuft rekursiv von den hinteren zu den vorderen Kindern
+     * ({@code z}-Reihenfolge), sodass ein vorne liegendes, überlappendes Kind Vorrang hat.
+     * Erst wenn kein Kind trifft, wird die eigene absolute Bounding-Box geprüft – allerdings
+     * nur, wenn dieses Widget selbst {@link #isInteractable() interaktabel} ist. Reine Container
+     * (z. B. {@link Panel}, {@link RootWidget}) werden übersprungen, Klicks auf deren Fläche
+     * ergeben daher {@code null}.</p>
+     *
+     * @param x X-Koordinate absolut – im Koordinatensystem der Wurzel/des Canvases,
+     *          nicht relativ zum Eltern-Widget
+     * @param y Y-Koordinate absolut – im Koordinatensystem der Wurzel/des Canvases,
+     *          nicht relativ zum Eltern-Widget
+     * @return das oberste getroffene, interaktable Widget oder {@code null}, wenn kein
+     *         interaktables Widget getroffen wurde
+     */
+    public final Widget hitTest(final float x, final float y) {
+        // Von hinten nach vorne durchgehen, damit das oberste Widget gewinnt.
+        for (int i = children.size() - 1; i >= 0; i--) {
+            final Widget hit = children.get(i).hitTest(x, y);
+            if (hit != null) return hit;
+        }
+        if (!interactable) {
+            return null;
+        }
+        return getAbsoluteBounds().contains(x, y) ? this : null;
     }
 
     /**
@@ -161,25 +260,13 @@ public abstract class Widget {
     }
 
     /**
-     * Liefert das oberste (zuletzt gezeichnete) Widget, das die übergebene Position abdeckt.
+     * Liefert, ob die Maustaste derzeit über diesem Widget gedrückt ist.
+     * Wird für die optische Pressed-Darstellung (z. B. in {@link Button#drawSelf(Graphics2D, Rect)}) verwendet.
      *
-     * <p>Die Prüfung läuft rekursiv von den hinteren zu den vorderen Kindern
-     * ({@code z}-Reihenfolge), sodass ein vorne liegendes, überlappendes Kind Vorrang hat.
-     * Erst wenn kein Kind trifft, wird die eigene absolute Bounding-Box geprüft.</p>
-     *
-     * @param x X-Koordinate absolut – im Koordinatensystem der Wurzel/des Canvases,
-     *          nicht relativ zum Eltern-Widget
-     * @param y Y-Koordinate absolut – im Koordinatensystem der Wurzel/des Canvases,
-     *          nicht relativ zum Eltern-Widget
-     * @return das getroffene Widget oder {@code null}, wenn kein Widget getroffen wurde
+     * @return {@code true}, solange das Widget gedrückt ist
      */
-    public final Widget hitTest(final float x, final float y) {
-        // Von hinten nach vorne durchgehen, damit das oberste Widget gewinnt.
-        for (int i = children.size() - 1; i >= 0; i--) {
-            final Widget hit = children.get(i).hitTest(x, y);
-            if (hit != null) return hit;
-        }
-        return getAbsoluteBounds().contains(x, y) ? this : null;
+    public boolean isMousePressed() {
+        return mousePressed;
     }
 
     /**
@@ -265,5 +352,54 @@ public abstract class Widget {
      */
     public final RectTransform getTransform() {
         return transform;
+    }
+
+    /**
+     * Setzt den Pressed-Zustand dieses Widgets. Wird vom {@code InputDispatcher} beim
+     * Drücken/Loslassen der Maustaste gesetzt; konkrete Widgets können den Zustand in
+     * {@link #drawSelf(Graphics2D, Rect)} für eine optische „Pressed“-Darstellung abfragen.
+     *
+     * @param mousePressed {@code true}, solange die Maustaste über diesem Widget gedrückt ist
+     */
+    public void setMousePressed(final boolean mousePressed) {
+        this.mousePressed = mousePressed;
+    }
+
+    /**
+     * Registriert einen Callback, der bei einem Klick auf dieses Widget ausgeführt wird.
+     *
+     * @param clickCallback die bei einem Klick auszuführende Aktion; {@code null} deaktiviert den Callback
+     */
+    public void setClickCallback(final Runnable clickCallback) {
+        this.clickCallback = clickCallback;
+    }
+
+    /**
+     * Registriert einen Callback, der ausgeführt wird, sobald der Mauszeiger über dieses
+     * Widget eintritt.
+     *
+     * @param hoverEnterCallback die auszuführende Aktion; {@code null} deaktiviert den Callback
+     */
+    public void setHoverEnterCallback(final Runnable hoverEnterCallback) {
+        this.hoverEnterCallback = hoverEnterCallback;
+    }
+
+    /**
+     * Registriert einen Callback, der ausgeführt wird, sobald der Mauszeiger dieses Widget
+     * wieder verlässt.
+     *
+     * @param hoverExitCallback die auszuführende Aktion; {@code null} deaktiviert den Callback
+     */
+    public void setHoverExitCallback(final Runnable hoverExitCallback) {
+        this.hoverExitCallback = hoverExitCallback;
+    }
+
+    /**
+     * Liefert, ob dieses Widget selbst Eingaben (Hover, Klick) empfangen kann.
+     *
+     * @return {@code true}, wenn das Widget ein Eingabeziel sein kann
+     */
+    public final boolean isInteractable() {
+        return interactable;
     }
 }
