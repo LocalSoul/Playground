@@ -34,6 +34,12 @@ public class Button extends Widget {
     private static final Color DEFAULT_TEXT_COLOR = Color.WHITE;
 
     /**
+     * Standardschriftart des Texts (Arial, normal, 12 pt).
+     * Kann pro Instanz über {@link #setFont(Font)} geändert werden.
+     */
+    private static final Font DEFAULT_FONT = new Font("Arial", Font.PLAIN, 12);
+
+    /**
      * Die 9-Slice-Textur, die als Hintergrund des Buttons dient.
      */
     @Nonnull
@@ -48,6 +54,11 @@ public class Button extends Widget {
      */
     @Nonnull
     private Color textColor;
+    /**
+     * Schriftart der Beschriftung. Initial {@link #DEFAULT_FONT}.
+     */
+    @Nonnull
+    private Font font;
 
     /**
      * Erzeugt einen Button mit Hintergrund-Textur, Beschriftung und Transformation.
@@ -61,6 +72,7 @@ public class Button extends Widget {
         this.slice = slice;
         this.text = text;
         this.textColor = DEFAULT_TEXT_COLOR;
+        this.font = DEFAULT_FONT;
     }
 
     /**
@@ -79,6 +91,15 @@ public class Button extends Widget {
      */
     public void setText(@Nonnull final String text) {
         this.text = text;
+    }
+
+    /**
+     * Setzt die Schriftart der Beschriftung neu.
+     *
+     * @param font die neue Schriftart; darf nicht {@code null} sein
+     */
+    public void setFont(@Nonnull final Font font) {
+        this.font = font;
     }
 
     /**
@@ -101,6 +122,10 @@ public class Button extends Widget {
 
         // Hintergrund: 9-Slice an den lokalen Ursprung (0,0) zeichnen.
         NineSliceRenderer.draw(g, slice, width, height);
+
+        // Schriftart setzen, BEVOR die FontMetrics ermittelt werden –
+        // getFontMetrics() misst stets mit der aktuell gesetzten Font.
+        g.setFont(font);
 
         // FontMetrics nur einmal ermitteln, dann gleich für Breite und Höhe nutzen.
         final FontMetrics fm = g.getFontMetrics();
