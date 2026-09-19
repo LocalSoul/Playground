@@ -22,7 +22,10 @@ import java.util.Objects;
  * <p>Der Lebenszyklus eines Widgets gliedert sich in drei Phasen:</p>
  * <ol>
  *     <li><b>Layout</b> – {@link #relayout()} wendet eine {@link LayoutStrategy} auf die Kinder an.</li>
- *     <li><b>Update</b> – {@link #update(float)} wird pro Frame mit der vergangenen Zeit aufgerufen.</li>
+ *     <li><b>Update</b> – {@link #update(float)} wird pro Frame mit der vergangenen Zeit aufgerufen.
+ *          Es ist ein Template-Method-Pattern analog zu {@link #draw(Graphics2D)}: Das Widget aktualisiert
+ *          zuerst sich selbst über den {@link #updateSelf(float)}-Hook und danach rekursiv alle Kinder –
+ *          ein einziger Aufruf auf der Wurzel genügt, um die gesamte Hierarchie zu aktualisieren.</li>
  *     <li><b>Draw</b> – {@link #draw(Graphics2D)} rendert das Widget und anschließend rekursiv alle Kinder.</li>
  * </ol>
  *
@@ -158,12 +161,34 @@ public abstract class Widget {
     }
 
     /**
-     * Pro-Frame-Update-Hook. Wird von außen (z. B. von der Spiel- oder Render-Schleife)
-     * für jedes Widget aufgerufen.
+     * Pro-Frame-Update. Implementiert das Template-Method-Pattern analog zu {@link #draw(Graphics2D)}:
+     * Zuerst wird die eigene Logik über den {@link #updateSelf(float)}-Hook ausgeführt, danach werden
+     * rekursiv alle Kinder über {@code child.update(dt)} aktualisiert.
+     *
+     * <p>Diese Methode ist {@code final}, damit die Reihenfolge „Self → Children" fest garantiert
+     * bleibt und keine Unterklasse sie versehentlich bricht. Ein einziger Aufruf auf der Wurzel
+     * reicht aus, um pro Frame die gesamte Hierarchie zu aktualisieren.</p>
      *
      * @param dt vergangene Zeit seit dem letzten Frame in Sekunden
      */
-    public void update(final float dt) {
+    public final void update(final float dt) {
+        updateSelf(dt);  // <- das überschreibt jede konkrete Widget-Klasse
+        for (final Widget child : children) {
+            child.update(dt);  // <- das bleibt in der Basisklasse, unverändert
+        }
+    }
+
+    /**
+     * Hook für die eigene Pro-Frame-Logik eines Widgets (die konkrete Widget-Klasse).
+     * Wird von {@link #update(float)} vor den Kindern aufgerufen.
+     *
+     * <p>Konkrete Unterklassen überschreiben diese Methode, um Animationen, Timer oder andere
+     * zeitabhängige Zustände fortzuschreiben. Reine Container ohne eigene Logik müssen sie
+     * nicht überschreiben.</p>
+     *
+     * @param dt vergangene Zeit seit dem letzten Frame in Sekunden
+     */
+    protected void updateSelf(final float dt) {
         // Default: nichts zu tun. Konkrete Widgets überschreiben diesen Hook nach Bedarf.
     }
 
