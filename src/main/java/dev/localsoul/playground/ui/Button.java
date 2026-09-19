@@ -132,11 +132,14 @@ public class Button extends Widget {
         final int textWidth = fm.stringWidth(text);
 
         // Horizontale Zentrierung: linke Textkante = Mitte − halbe Textbreite.
-        final float centerX = (width - textWidth) / 2f;
+        // Anders als beim Hintergrund wird hier nicht auf int gecastet, sondern mit den
+        // rohen Float-Bounds gerechnet – so bleibt die Zentrierung subpixel-genau.
+        final float centerX = (bounds.width() - textWidth) / 2f;
 
         // Vertikale Zentrierung: Baseline so wählen, dass die komplette Zeilenbox (nicht nur
         // der Ascent-Teil) in der Mitte sitzt. Ohne +ascent würde der Text zu hoch stehen.
-        final float centerY = (height - fm.getHeight()) / 2f + fm.getAscent();
+        // Auch hier die Float-Bounds verwenden, um Rundungsfehler der Höhe zu vermeiden.
+        final float centerY = (bounds.height() - fm.getHeight()) / 2f + fm.getAscent();
 
         g.setColor(textColor);
         g.drawString(text, centerX, centerY);
