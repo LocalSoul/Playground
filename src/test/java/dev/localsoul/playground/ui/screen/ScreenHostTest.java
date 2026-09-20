@@ -33,6 +33,37 @@ class ScreenHostTest {
         root.addChild(host);
     }
 
+    /**
+     * Ein Screen, der seine Hooks und Updates protokolliert.
+     */
+    private final class RecordingScreen extends Screen {
+        final List<Float> dts = new ArrayList<>();
+        private final String name;
+        boolean attachedInOnShow;
+        boolean attachedInOnHide;
+
+        RecordingScreen(final String name) {
+            this.name = name;
+        }
+
+        @Override
+        protected void onShow() {
+            attachedInOnShow = getParent() != null;
+            log.add(name + ":show");
+        }
+
+        @Override
+        protected void onHide() {
+            attachedInOnHide = getParent() != null;
+            log.add(name + ":hide");
+        }
+
+        @Override
+        protected void updateSelf(final float dt) {
+            dts.add(dt);
+        }
+    }
+
     @Test
     void showIsDeferredUntilTheNextUpdate() {
         final Screen a = new RecordingScreen("a");
@@ -247,36 +278,5 @@ class ScreenHostTest {
 
         assertEquals(1, clicksInA.get());
         assertEquals(1, clicksInB.get());
-    }
-
-    /**
-     * Ein Screen, der seine Hooks und Updates protokolliert.
-     */
-    private final class RecordingScreen extends Screen {
-        final List<Float> dts = new ArrayList<>();
-        private final String name;
-        boolean attachedInOnShow;
-        boolean attachedInOnHide;
-
-        RecordingScreen(final String name) {
-            this.name = name;
-        }
-
-        @Override
-        protected void onShow() {
-            attachedInOnShow = getParent() != null;
-            log.add(name + ":show");
-        }
-
-        @Override
-        protected void onHide() {
-            attachedInOnHide = getParent() != null;
-            log.add(name + ":hide");
-        }
-
-        @Override
-        protected void updateSelf(final float dt) {
-            dts.add(dt);
-        }
     }
 }

@@ -12,6 +12,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ScreenTest {
 
+    private static final class EmptyScreen extends Screen {
+    }
+
     @Test
     void screenFillsItsParentCompletely() {
         final RootWidget root = new RootWidget(640, 360);
@@ -51,8 +54,5 @@ class ScreenTest {
         root.addChild(screen);
 
         assertSame(button, root.hitTest(20, 20));
-    }
-
-    private static final class EmptyScreen extends Screen {
     }
 }

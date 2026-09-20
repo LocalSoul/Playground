@@ -162,9 +162,7 @@ class WidgetRemoveChildTest {
         assertTrue(after.dts.contains(0.2f));
     }
 
-    /**
-     * Merkt sich alle Update-Aufrufe.
-     */
+    /** Merkt sich alle Update-Aufrufe. */
     private static final class Recorder extends Widget {
         final List<Float> dts = new ArrayList<>();
 

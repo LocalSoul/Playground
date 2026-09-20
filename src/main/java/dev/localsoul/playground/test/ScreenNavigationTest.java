@@ -52,6 +52,29 @@ public class ScreenNavigationTest {
     private static final Color TAB_ACTIVE = Color.WHITE;
     private static final Color TAB_INACTIVE = new Color(75, 40, 15);
 
+    /**
+     * Die Bezeichner der Screens.
+     */
+    enum Tab {
+        QUESTS("Quests", new Color(46, 92, 72)),
+        CHARACTER("Charakter", new Color(82, 64, 122));
+
+        final String label;
+        final Color background;
+
+        Tab(final String label, final Color background) {
+            this.label = label;
+            this.background = background;
+        }
+    }
+
+    /**
+     * Das simulierte Spielmodell: nur ein Goldzähler, den die Spiellogik erhöht.
+     */
+    static final class Wallet {
+        long gold;
+    }
+
     static void main() {
 
         final AssetManager assets = new AssetManager();
@@ -101,32 +124,7 @@ public class ScreenNavigationTest {
         return navigator;
     }
 
-    /**
-     * Die Bezeichner der Screens.
-     */
-    enum Tab {
-        QUESTS("Quests", new Color(46, 92, 72)),
-        CHARACTER("Charakter", new Color(82, 64, 122));
-
-        final String label;
-        final Color background;
-
-        Tab(final String label, final Color background) {
-            this.label = label;
-            this.background = background;
-        }
-    }
-
-    /**
-     * Das simulierte Spielmodell: nur ein Goldzähler, den die Spiellogik erhöht.
-     */
-    static final class Wallet {
-        long gold;
-    }
-
-    /**
-     * Dauerhafte obere Leiste: zeigt das Gold, gelesen aus dem Modell.
-     */
+    /** Dauerhafte obere Leiste: zeigt das Gold, gelesen aus dem Modell. */
     private static final class ResourceBar extends Widget {
 
         private final Wallet wallet;
@@ -149,9 +147,7 @@ public class ScreenNavigationTest {
         }
     }
 
-    /**
-     * Dauerhafte untere Leiste mit einem Button pro Tab.
-     */
+    /** Dauerhafte untere Leiste mit einem Button pro Tab. */
     private static final class NavBar extends Widget {
 
         NavBar(final Navigator<Tab> navigator, final NineSlice buttonSlice) {
@@ -173,9 +169,7 @@ public class ScreenNavigationTest {
         }
     }
 
-    /**
-     * Button, der zu seinem Tab navigiert und seinen aktiven Zustand jedes Frame vom Navigator abliest.
-     */
+    /** Button, der zu seinem Tab navigiert und seinen aktiven Zustand jedes Frame vom Navigator abliest. */
     private static final class TabButton extends Button {
 
         private final Tab tab;
@@ -196,9 +190,7 @@ public class ScreenNavigationTest {
         }
     }
 
-    /**
-     * Ein Platzhalter-Screen, der seinen Lebenszyklus und den erhaltenen Zustand sichtbar macht.
-     */
+    /** Ein Platzhalter-Screen, der seinen Lebenszyklus und den erhaltenen Zustand sichtbar macht. */
     private static final class DemoScreen extends Screen {
 
         private final Tab tab;

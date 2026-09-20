@@ -43,9 +43,7 @@ public final class ScreenHost extends Widget {
      */
     private Screen current;
 
-    /**
-     * Die vorgemerkte Anfrage; {@code null}, wenn nichts ansteht.
-     */
+    /** Die vorgemerkte Anfrage; {@code null}, wenn nichts ansteht. */
     private Screen pending;
 
     /**

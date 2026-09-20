@@ -14,12 +14,32 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class NavigatorTest {
 
+    private enum Tab {QUESTS, CHARACTER, SETTINGS}
+
     private final List<String> log = new ArrayList<>();
     private RootWidget root;
     private ScreenHost host;
     private Navigator<Tab> navigator;
     private Screen quests;
     private Screen character;
+
+    private final class NamedScreen extends Screen {
+        private final String name;
+
+        NamedScreen(final String name) {
+            this.name = name;
+        }
+
+        @Override
+        protected void onShow() {
+            log.add(name + ":show");
+        }
+
+        @Override
+        protected void onHide() {
+            log.add(name + ":hide");
+        }
+    }
 
     @BeforeEach
     void setUp() {
@@ -132,25 +152,5 @@ class NavigatorTest {
     @Test
     void registerReturnsTheSameNavigatorForChaining() {
         assertSame(navigator, navigator.register(Tab.SETTINGS, new NamedScreen("settings")));
-    }
-
-    private enum Tab {QUESTS, CHARACTER, SETTINGS}
-
-    private final class NamedScreen extends Screen {
-        private final String name;
-
-        NamedScreen(final String name) {
-            this.name = name;
-        }
-
-        @Override
-        protected void onShow() {
-            log.add(name + ":show");
-        }
-
-        @Override
-        protected void onHide() {
-            log.add(name + ":hide");
-        }
     }
 }
