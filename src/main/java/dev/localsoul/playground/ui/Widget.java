@@ -298,6 +298,37 @@ public abstract class Widget {
     }
 
     /**
+     * Entfernt ein direktes Kind aus diesem Widget – das Gegenstück zu {@link #addChild(Widget)}.
+     *
+     * <p>Das entfernte Widget hat danach keinen Eltern-Bezug mehr ({@link #getParent()} liefert
+     * {@code null}), wird nicht mehr gezeichnet, aktualisiert oder von {@link #hitTest(float, float)}
+     * gefunden und darf später wieder (auch bei einem anderen Widget) mit {@code addChild}
+     * eingehängt werden. Es behält seine eigenen Kinder. Ein entferntes Widget hat keine
+     * auflösbaren Bounds mehr; {@link #getBounds()} setzt einen Parent voraus.</p>
+     *
+     * <p><b>Während eines Update-Durchlaufs:</b> Entfernt ein Widget sich selbst oder ein Geschwister
+     * aus dem Elternteil, während dieses gerade seine Kinder aktualisiert, wirft das keinen Fehler,
+     * aber ein nachfolgendes Geschwister kann in diesem einen Frame übersprungen werden, weil die
+     * Liste nachrückt. Bei Wechseln ganzer Bereiche daher besser den
+     * {@code ScreenHost} verwenden, der so einen Wechsel an einer sicheren Stelle des Frames
+     * ausführt.</p>
+     *
+     * @param child das zu entfernende Kind; darf nicht {@code null} sein
+     * @return {@code true}, wenn das Widget ein direktes Kind war und entfernt wurde;
+     * {@code false}, wenn es kein Kind dieses Widgets war (dann bleibt alles unverändert)
+     * @throws NullPointerException wenn {@code child} {@code null} ist
+     */
+    public final boolean removeChild(@Nonnull final Widget child) {
+        Objects.requireNonNull(child, "child must not be null");
+        if (child.parent != this) {
+            return false; // kein Kind dieses Widgets – insbesondere ein Kind eines anderen Parents bleibt unberührt
+        }
+        children.remove(child);
+        child.parent = null;
+        return true;
+    }
+
+    /**
      * Liefert, ob die Maustaste derzeit über diesem Widget gedrückt ist.
      * Wird für die optische Pressed-Darstellung (z. B. in {@link Button#drawSelf(Graphics2D, Rect)}) verwendet.
      *

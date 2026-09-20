@@ -27,6 +27,18 @@ public record Anchor(Vector2f min, Vector2f max) {
     public static final Anchor RIGHT_STRETCH = new Anchor(new Vector2f(1f, 0f), new Vector2f(1f, 1f));
 
     /**
+     * Streckt in <b>beiden</b> Achsen über die gesamte Fläche des Elternteils. Die Offsets von
+     * {@code RectTransform} wirken dann als Abstände zu den Rändern: {@code offsetMin} verschiebt
+     * die linke/obere Kante nach innen, {@code offsetMax} die rechte/untere Kante (negative
+     * Werte rücken nach innen). Ohne Offsets füllt das Widget den Elternteil vollständig.
+     *
+     * <p>Beispiel: Ein Bereich zwischen einer 56 px hohen oberen und einer 72 px hohen unteren
+     * Leiste hat {@code offsetMin = (0, 56)} und {@code offsetMax = (0, -72)}; die
+     * {@code size} wird bei gestreckten Achsen nicht verwendet.</p>
+     */
+    public static final Anchor STRETCH = new Anchor(new Vector2f(), new Vector2f(1f, 1f));
+
+    /**
      * Liefert den unteren/kleineren Anker-Punkt als defensive Kopie.
      *
      * @return eine Kopie des {@code min}-Vektors, damit der interne Wert nicht mutiert wird
