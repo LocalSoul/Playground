@@ -169,12 +169,25 @@ public abstract class Widget {
      * bleibt und keine Unterklasse sie versehentlich bricht. Ein einziger Aufruf auf der Wurzel
      * reicht aus, um pro Frame die gesamte Hierarchie zu aktualisieren.</p>
      *
+     * <p>Widgets dürfen sich während ihres Updates verändern, auch an Vorfahren: Beispielsweise
+     * kann ein Widget einen Floating-Text an die Wurzel hängen, während diese gerade ihre Kinder
+     * aktualisiert. Ein während des Durchlaufs hinzugefügtes Kind wird <b>erst im nächsten Frame</b>
+     * erstmals aktualisiert. Fügt ein Widget sich in {@code updateSelf} eigene Kinder hinzu, werden
+     * diese dagegen noch im selben Durchlauf aktualisiert, weil sie vor der Kinder-Schleife
+     * existieren. Ein Widget, das in jedem Update ein Geschwister anhängt, kann den Durchlauf so
+     * nicht endlos verlängern.</p>
+     *
      * @param dt vergangene Zeit seit dem letzten Frame in Sekunden
      */
     public final void update(final float dt) {
         updateSelf(dt);  // <- das überschreibt jede konkrete Widget-Klasse
-        for (final Widget child : children) {
-            child.update(dt);  // <- das bleibt in der Basisklasse, unverändert
+        // Index-Schleife über eine Momentaufnahme der Kinderzahl statt for-each: Ein for-each würde
+        // bei addChild() auf diesem Widget (z. B. durch ein Kind) eine ConcurrentModificationException
+        // werfen. Die zweite Bedingung schützt zusätzlich vor einer schrumpfenden Liste, falls später
+        // ein removeChild() ergänzt wird.
+        final int count = children.size();
+        for (int i = 0; i < count && i < children.size(); i++) {
+            children.get(i).update(dt);  // <- das bleibt in der Basisklasse, unverändert
         }
     }
 

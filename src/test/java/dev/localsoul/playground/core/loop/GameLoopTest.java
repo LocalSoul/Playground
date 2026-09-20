@@ -131,6 +131,37 @@ class GameLoopTest {
     }
 
     @Test
+    void rejectsNonPositiveTickLength() {
+        final LoopListener noop = new LoopListener() {
+            @Override
+            public void tick(final double dt) {
+            }
+
+            @Override
+            public void catchUp(final long nanos) {
+            }
+
+            @Override
+            public void frame(final float dt) {
+            }
+        };
+
+        // Ein Schritt von 0 würde die Tick-Schleife in advance() endlos laufen lassen.
+        assertThrows(IllegalArgumentException.class, () -> new GameLoop(() -> 0L, 0L, noop));
+        assertThrows(IllegalArgumentException.class, () -> new GameLoop(() -> 0L, -1L, noop));
+    }
+
+    @Test
+    void clockRunningBackwardsProducesNoNegativeTime() {
+        advanceTo(1_000);
+        advanceTo(900);      // simulierte Uhr springt zurück
+
+        assertEquals(0, count("tick"));
+        assertEquals(1, count("frame"));
+        assertEquals(0f, frameDts.get(0));   // nicht -0,1
+    }
+
+    @Test
     void noTimeIsLostOrInvented() {
         // Pseudo-zufällige Frame-Abstände: meist kurz, gelegentlich lange Lücken.
         // Invariante nach jedem Aufruf: vergangene Zeit = Ticks * Schritt + catchUp + Rest im Akkumulator,

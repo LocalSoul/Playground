@@ -5,6 +5,7 @@ import dev.localsoul.playground.core.math.rect.RectTransform;
 import dev.localsoul.playground.ui.anchor.Anchor;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -61,6 +62,60 @@ class WidgetUpdateTest {
 
         assertDoesNotThrow(() -> root.update(0.5f));
         assertEquals(List.of(0.5f), spawned.dts);
+    }
+
+    @Test
+    void widgetAddedToAncestorDuringUpdateIsUpdatedFromNextFrame() {
+        final RootWidget root = new RootWidget(100, 100);
+        final Recorder late = new Recorder("late", null);
+        final Widget spawner = new TestWidget(transform()) {
+            private boolean spawned;
+
+            @Override
+            protected void updateSelf(final float dt) {
+                if (!spawned) {
+                    spawned = true;
+                    root.addChild(late);   // die Wurzel iteriert gerade über ihre Kinder
+                }
+            }
+        };
+        root.addChild(spawner);
+
+        assertDoesNotThrow(() -> root.update(0.1f));
+        assertTrue(late.dts.isEmpty(), "im selben Durchlauf noch nicht aktualisiert");
+        assertEquals(2, root.getChildren().size());
+
+        root.update(0.2f);
+        assertEquals(List.of(0.2f), late.dts);
+    }
+
+    @Test
+    void widgetThatAddsASiblingInEveryUpdateCannotExtendOnePassEndlessly() {
+        final RootWidget root = new RootWidget(100, 100);
+        root.addChild(new Spawner(root));
+
+        // Jeder Spawner hängt beim Update einen weiteren an die Wurzel. Pro Durchlauf darf
+        // trotzdem nur die Momentaufnahme der Kinder aktualisiert werden.
+        assertTimeoutPreemptively(Duration.ofSeconds(2), () -> root.update(0.1f));
+        assertEquals(2, root.getChildren().size());
+
+        assertTimeoutPreemptively(Duration.ofSeconds(2), () -> root.update(0.1f));
+        assertEquals(4, root.getChildren().size());
+    }
+
+    /** Hängt bei jedem Update ein neues Exemplar seiner selbst an das Ziel-Widget. */
+    private static final class Spawner extends Widget {
+        private final Widget target;
+
+        Spawner(final Widget target) {
+            super(transform());
+            this.target = target;
+        }
+
+        @Override
+        protected void updateSelf(final float dt) {
+            target.addChild(new Spawner(target));
+        }
     }
 
     /** Merkt sich alle Update-Aufrufe und trägt optional seinen Namen in ein gemeinsames Protokoll ein. */

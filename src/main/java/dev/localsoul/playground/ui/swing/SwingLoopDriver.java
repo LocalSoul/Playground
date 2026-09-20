@@ -8,6 +8,7 @@ import dev.localsoul.playground.ui.RootWidget;
 import javax.annotation.Nonnull;
 import javax.swing.*;
 import java.awt.*;
+import java.util.Objects;
 
 /**
  * Treibt eine {@link RootWidget}-Szene in einem Swing-Fenster über einen {@link GameLoop} an.
@@ -143,6 +144,15 @@ public final class SwingLoopDriver {
         input = new InputDispatcher(root);
         canvas = new UICanvas(root, input);
         canvas.setPreferredSize(new Dimension(width, height));
+
+        Objects.requireNonNull(logic, "Logic must not be null");
+        if(tickNanos <= 0){
+            throw new IllegalArgumentException("tickNanos must be > 0");
+        }
+
+        if(frameMillis <= 0){
+            throw new IllegalArgumentException("frameMillis must be > 0");
+        }
 
         // Der Treiber übernimmt den Standard-Frame-Schritt (Eingabe, Hierarchie-Update,
         // Repaint); trotzdem bleibt der gesamte LoopListener sichtbar, damit tick/catchUp

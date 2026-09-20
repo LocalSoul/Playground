@@ -75,8 +75,14 @@ public final class GameLoop {
      * @param clock     Zeitquelle in ns; darf nicht {@code null} sein
      * @param tickNanos Länge eines Logik-Schritts in ns (größer 0)
      * @param listener  Empfänger der Logik-/Frame-Aufrufe; darf nicht {@code null} sein
+     * @throws IllegalArgumentException wenn {@code tickNanos} nicht größer als 0 ist – bei einem
+     *                                  Schritt von 0 würde die Tick-Schleife in {@link #advance()}
+     *                                  nie enden
      */
     public GameLoop(final LongSupplier clock, final long tickNanos, final LoopListener listener) {
+        if (tickNanos <= 0) {
+            throw new IllegalArgumentException("tickNanos must be > 0 but was " + tickNanos);
+        }
         this.clock = clock;
         this.tickNanos = tickNanos;
         this.tickSeconds = tickNanos / 1e9;
@@ -111,7 +117,9 @@ public final class GameLoop {
             return;
         }
 
-        final long delta = now - last;
+        // Math.max: Eine rückwärts laufende Uhr (mit System::nanoTime nicht möglich, aber mit einer
+        // simulierten Uhr) darf keine negative Frame-Zeit erzeugen.
+        final long delta = Math.max(0L, now - last);
         last = now; // vor der Verarbeitung merken, damit die Verarbeitungszeit im nächsten Delta mitgezählt wird
 
         // Nur so viel nachspielen, wie ein Frame verkraftet; den Rest nicht wegwerfen,
